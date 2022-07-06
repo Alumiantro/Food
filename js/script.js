@@ -77,14 +77,61 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     setClock(deadline);
 
+    //Modal
+    const btnsModal = document.querySelectorAll("[data-modal]");
+    const closeModal = document.querySelector("[data-close]");
+    const modal = document.querySelector('.modal');
+    
+    btnsModal.forEach((item) => {
+        item.addEventListener('click', openModal);
+    });
+
+    function openModal() {
+        modal.classList.add('show');
+        modal.classList.remove('hide');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimerId); // если юзер открыл окно сам, мы не будем его открывать повторно через таймаут
+    }
+
+    function hideModal() {
+        modal.classList.add('hide');
+        modal.classList.remove('add');
+        document.body.style.overflow = '';
+    }
+
+    closeModal.addEventListener('click', hideModal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            hideModal();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Escape' && modal.classList.contains('show')) {
+            hideModal();
+        }
+    });
+
+    const modalTimerId = setTimeout(openModal, 3000);
+
+    function showModalByScroll() {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
+    window.addEventListener('scroll', showModalByScroll);
+
     //Classes
     class MenuCard {
-        constructor(src, alt, title, descr, price, parent, transfer) {
+        constructor(src, alt, title, descr, price, parent, transfer, ...classes) {
             this.src = src;
             this.alt = alt;
             this.title = title;
             this.descr = descr;
             this.price = price;
+            this.classes = classes;
             this.parent = document.querySelector(parent);
             this.transfer = 27;
             this.changeToUAH();
@@ -96,9 +143,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
         render() {
             const element = document.createElement('div');
+            if (this.classes.length === 0) {
+                this.classes = "menu__item";
+                element.classList.add(this.classes);
+            } else {
+                this.classes.forEach(className => element.classList.add(className));
+            }
 
             element.innerHTML = `
-            <div class="menu__item">
                     <img src=${this.src} alt=${this.alt}>
                     <h3 class="menu__item-subtitle">${this.title}</h3>
                     <div class="menu__item-descr">${this.descr}</div>
@@ -107,7 +159,6 @@ window.addEventListener('DOMContentLoaded', () => {
                         <div class="menu__item-cost">Цена:</div>
                         <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
                     </div>
-                </div>
             `;
 
             this.parent.append(element);
