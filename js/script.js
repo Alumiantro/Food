@@ -81,7 +81,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const btnsModal = document.querySelectorAll("[data-modal]");
     const closeModal = document.querySelector("[data-close]");
     const modal = document.querySelector('.modal');
-    
+
     btnsModal.forEach((item) => {
         item.addEventListener('click', openModal);
     });
@@ -191,4 +191,43 @@ window.addEventListener('DOMContentLoaded', () => {
         14,
         '.menu .container'
     ).render();
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        postData(form)
+    })
+
+    const messages = {
+        success: 'Перезвоним через минуту',
+        error: 'Что-то пошло не так',
+        download: 'Идет загрузка'
+    }
+
+    function postData(form) {
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            const status = document.createElement('div');
+            status.classList.add('status'); //можно добавить класс
+            status.textContent = messages.download;
+            form.append(status)
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            const formData = new FormData(form);
+            // request.setRequestHeader('Content-Type', 'multipart/form-data'); если прописать это, то работать не будет
+
+            request.send(formData);
+
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response)
+                    status.textContent = messages.success;
+                } else {
+                    status.textContent = messages.error;
+                }
+            });
+        });
+    }
 });
