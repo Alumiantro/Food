@@ -192,40 +192,41 @@ window.addEventListener('DOMContentLoaded', () => {
         '.menu .container'
     ).render();
 
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-        postData(form)
-    })
+    //Post Data
 
     const messages = {
         success: 'Перезвоним через минуту',
         error: 'Что-то пошло не так',
         download: 'Идет загрузка'
-    }
+    };
+
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach(form => {
+        postData(form);
+    })
 
     function postData(form) {
-        form.addEventListener('submit', e => {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const status = document.createElement('div');
-            status.classList.add('status'); //можно добавить класс
-            status.textContent = messages.download;
-            form.append(status)
+            const answer = document.createElement('div');
+            form.append(answer);
 
             const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
 
             const formData = new FormData(form);
-            // request.setRequestHeader('Content-Type', 'multipart/form-data'); если прописать это, то работать не будет
+            request.open('POST', 'server.php');
 
             request.send(formData);
+            answer.textContent = messages.download;
 
             request.addEventListener('load', () => {
                 if (request.status === 200) {
-                    console.log(request.response)
-                    status.textContent = messages.success;
+                    console.log(request.response);
+                    answer.textContent = messages.success;
                 } else {
-                    status.textContent = messages.error;
+                    answer.textContent = messages.error;
                 }
             });
         });
