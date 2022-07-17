@@ -216,6 +216,16 @@ window.addEventListener('DOMContentLoaded', () => {
             const request = new XMLHttpRequest();
 
             const formData = new FormData(form);
+
+            // если необходимо отправить json
+
+            // const object = {};
+            // formData.forEach(function (value, key) {
+            //     object[key] = value;
+            // })
+
+            // const jsonData = JSON.stringify(object);
+
             request.open('POST', 'server.php');
 
             request.send(formData);
@@ -225,6 +235,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (request.status === 200) {
                     console.log(request.response);
                     answer.textContent = messages.success;
+                    form.reset();
+                    setTimeout(() => {
+                        answer.remove();
+                    }, 2000);
                 } else {
                     answer.textContent = messages.error;
                 }
