@@ -197,7 +197,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const messages = {
         success: 'Перезвоним через минуту',
         error: 'Что-то пошло не так',
-        download: 'Идет загрузка'
+        download: 'img/form/spinner.svg'
     };
 
     const forms = document.querySelectorAll('form');
@@ -210,8 +210,7 @@ window.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const answer = document.createElement('div');
-            form.append(answer);
+            const answer = document.createElement('img');
 
             const request = new XMLHttpRequest();
 
@@ -229,14 +228,19 @@ window.addEventListener('DOMContentLoaded', () => {
             request.open('POST', 'server.php');
 
             request.send(formData);
-            answer.textContent = messages.download;
+            answer.src = messages.download;
+            answer.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
+            form.insertAdjacentElement('afterend', answer);
 
             request.addEventListener('load', () => {
                 if (request.status === 200) {
                     console.log(request.response);
-                    showThanksModal(messages.success)
-                    form.reset();
+                    showThanksModal(messages.success);
                     answer.remove();
+                    form.reset();
                 } else {
                     showThanksModal(messages.error);
                 }
@@ -245,26 +249,25 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     function showThanksModal(message) {
-        const prevModalDialog = document.querySelector('.modal__dialog');
+        const modalDialog = document.querySelector('.modal__dialog');
+        modalDialog.classList.add('hide')
 
-        prevModalDialog.classList.add('hide')
         openModal()
 
-        const thanksModal = document.createElement('div')
-        thanksModal.classList.add('modal__dialog')
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
         thanksModal.innerHTML = `
-            <div class='modal__content'>
-                <div class='modal__close' data-close>×</div>
-                <div class='modal__title'>${message}</div>
-            </div>
-        `;
+        <div class="modal__content">
+        <div class="modal__close" data-close>×</div>
+        <div class="modal__title">${message}</div>
+        </div>`;
 
-        modal.append(thanksModal)
+        modal.insertAdjacentElement('beforeend', thanksModal)
         setTimeout(() => {
             thanksModal.remove()
-            prevModalDialog.classList.add('show')
-            prevModalDialog.classList.remove('hide')
+            modalDialog.classList.add('show')
+            modalDialog.classList.remove('hide')
             hideModal()
-        }, 4000)
+        }, 40000)
     }
 });
