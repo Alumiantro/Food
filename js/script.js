@@ -211,23 +211,6 @@ window.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const answer = document.createElement('img');
-
-            const request = new XMLHttpRequest();
-
-            const formData = new FormData(form);
-
-            // если необходимо отправить json
-
-            // const object = {};
-            // formData.forEach(function (value, key) {
-            //     object[key] = value;
-            // })
-
-            // const jsonData = JSON.stringify(object);
-
-            request.open('POST', 'server.php');
-
-            request.send(formData);
             answer.src = messages.download;
             answer.style.cssText = `
                 display: block;
@@ -235,16 +218,39 @@ window.addEventListener('DOMContentLoaded', () => {
             `;
             form.insertAdjacentElement('afterend', answer);
 
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    showThanksModal(messages.success);
-                    answer.remove();
-                    form.reset();
-                } else {
-                    showThanksModal(messages.error);
-                }
-            });
+            const formData = new FormData(form);
+            const object = {};
+            formData.forEach(function (value, key) {
+                object[key] = value;
+            })
+
+            fetch('server1.php', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            }).then(data => data.text())
+            .then(data => {
+                console.log(data);
+                showThanksModal(messages.success);
+                answer.remove();
+            }).catch(() => {
+                showThanksModal(messages.error);
+            }).finally(() => {
+                form.reset();
+            })
+
+            // request.addEventListener('load', () => {
+            //     if (request.status === 200) {
+            //         console.log(request.response);
+            //         showThanksModal(messages.success);
+            //         answer.remove();
+            //         form.reset();
+            //     } else {
+            //         showThanksModal(messages.error);
+            //     }
+            // });
         });
     }
 
@@ -270,4 +276,8 @@ window.addEventListener('DOMContentLoaded', () => {
             hideModal()
         }, 40000)
     }
+
+    fetch('http://localhost:3000/menu')
+    .then(data => data.json())
+    .then(res => console.log(res))
 });
