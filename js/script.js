@@ -79,7 +79,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //Modal
     const btnsModal = document.querySelectorAll("[data-modal]");
-    const closeModal = document.querySelector("[data-close]");
+    // const closeModal = document.querySelector("[data-close]");
     const modal = document.querySelector('.modal');
 
     btnsModal.forEach((item) => {
@@ -99,10 +99,10 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
-    closeModal.addEventListener('click', hideModal);
+    // closeModal.addEventListener('click', hideModal);
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute('data-close') == '') {
             hideModal();
         }
     });
@@ -197,7 +197,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const messages = {
         success: 'Перезвоним через минуту',
         error: 'Что-то пошло не так',
-        download: 'Идет загрузка'
+        download: 'img/form/spinner.svg'
     };
 
     const forms = document.querySelectorAll('form');
@@ -210,39 +210,47 @@ window.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const answer = document.createElement('div');
-            form.append(answer);
-
-            const request = new XMLHttpRequest();
+            const answer = document.createElement('img');
+            answer.src = messages.download;
+            answer.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
+            form.insertAdjacentElement('afterend', answer);
 
             const formData = new FormData(form);
+            const object = {};
+            formData.forEach(function (value, key) {
+                object[key] = value;
+            })
 
-            // если необходимо отправить json
+            fetch('server1.php', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            }).then(data => data.text())
+            .then(data => {
+                console.log(data);
+                showThanksModal(messages.success);
+                answer.remove();
+            }).catch(() => {
+                showThanksModal(messages.error);
+            }).finally(() => {
+                form.reset();
+            })
 
-            // const object = {};
-            // formData.forEach(function (value, key) {
-            //     object[key] = value;
-            // })
-
-            // const jsonData = JSON.stringify(object);
-
-            request.open('POST', 'server.php');
-
-            request.send(formData);
-            answer.textContent = messages.download;
-
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    answer.textContent = messages.success;
-                    form.reset();
-                    setTimeout(() => {
-                        answer.remove();
-                    }, 2000);
-                } else {
-                    answer.textContent = messages.error;
-                }
-            });
+            // request.addEventListener('load', () => {
+            //     if (request.status === 200) {
+            //         console.log(request.response);
+            //         showThanksModal(messages.success);
+            //         answer.remove();
+            //         form.reset();
+            //     } else {
+            //         showThanksModal(messages.error);
+            //     }
+            // });
         });
     }
 
@@ -258,4 +266,30 @@ window.addEventListener('DOMContentLoaded', () => {
     })
     .then(response => response.json())
     .then(json => console.log(json))
+    function showThanksModal(message) {
+        const modalDialog = document.querySelector('.modal__dialog');
+        modalDialog.classList.add('hide')
+
+        openModal()
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+        <div class="modal__content">
+        <div class="modal__close" data-close>×</div>
+        <div class="modal__title">${message}</div>
+        </div>`;
+
+        modal.insertAdjacentElement('beforeend', thanksModal)
+        setTimeout(() => {
+            thanksModal.remove()
+            modalDialog.classList.add('show')
+            modalDialog.classList.remove('hide')
+            hideModal()
+        }, 40000)
+    }
+
+    fetch('http://localhost:3000/menu')
+    .then(data => data.json())
+    .then(res => console.log(res))
 });
