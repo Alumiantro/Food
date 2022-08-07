@@ -245,4 +245,17 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        body: JSON.stringify({
+            name: 'Adelya',
+            age: 12
+        }),
+        headers: {
+            'content-type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(json => console.log(json))
 });
