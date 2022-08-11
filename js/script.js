@@ -235,6 +235,18 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        body: JSON.stringify({
+            name: 'Adelya',
+            age: 12
+        }),
+        headers: {
+            'content-type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(json => console.log(json))
     function showThanksModal(message) {
         const modalDialog = document.querySelector('.modal__dialog');
         modalDialog.classList.add('hide')
