@@ -177,8 +177,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     getResources('http://localhost:3000/menu')
     .then(data => {
-        data.forEach(obj => {
-            new MenuCard(obj.img, obj.altimg, obj.title, obj.descr, obj.price).render();
+        data.forEach(({img, altimg, title, descr, price}) => {
+            new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
         });
     })
 
