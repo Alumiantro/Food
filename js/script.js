@@ -203,28 +203,39 @@ window.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('form');
 
     forms.forEach(form => {
-        postData(form);
-    })
+        bindPostData(form);
+    });
 
-    function postData(form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
+    const postData = () => {
+        const res = fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            }
+        });
+};
 
-            const answer = document.createElement('img');
-            answer.src = messages.download;
-            answer.style.cssText = `
+function bindPostData(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const answer = document.createElement('img');
+        answer.src = messages.download;
+        answer.style.cssText = `
                 display: block;
                 margin: 0 auto;
             `;
-            form.insertAdjacentElement('afterend', answer);
+        form.insertAdjacentElement('afterend', answer);
 
-            const formData = new FormData(form);
-            const object = {};
-            formData.forEach(function (value, key) {
-                object[key] = value;
-            })
+        const formData = new FormData(form);
+        const object = {};
+        formData.forEach(function (value, key) {
+            object[key] = value;
+        })
 
-            fetch('server1.php', {
+        fetch('server1.php', {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json'
@@ -241,55 +252,56 @@ window.addEventListener('DOMContentLoaded', () => {
                 form.reset();
             })
 
-            // request.addEventListener('load', () => {
-            //     if (request.status === 200) {
-            //         console.log(request.response);
-            //         showThanksModal(messages.success);
-            //         answer.remove();
-            //         form.reset();
-            //     } else {
-            //         showThanksModal(messages.error);
-            //     }
-            // });
-        });
+        // request.addEventListener('load', () => {
+        //     if (request.status === 200) {
+        //         console.log(request.response);
+        //         showThanksModal(messages.success);
+        //         answer.remove();
+        //         form.reset();
+        //     } else {
+        //         showThanksModal(messages.error);
+        //     }
+        // });
+    });
+}
+
+fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    body: JSON.stringify({
+        name: 'Adelya',
+        age: 12
+    }),
+    headers: {
+        'content-type': 'application/json'
     }
+})
+.then(response => response.json())
+.then(json => console.log(json))
 
-    fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        body: JSON.stringify({
-            name: 'Adelya',
-            age: 12
-        }),
-        headers: {
-            'content-type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(json => console.log(json))
-    function showThanksModal(message) {
-        const modalDialog = document.querySelector('.modal__dialog');
-        modalDialog.classList.add('hide')
+function showThanksModal(message) {
+    const modalDialog = document.querySelector('.modal__dialog');
+    modalDialog.classList.add('hide')
 
-        openModal()
+    openModal()
 
-        const thanksModal = document.createElement('div');
-        thanksModal.classList.add('modal__dialog');
-        thanksModal.innerHTML = `
+    const thanksModal = document.createElement('div');
+    thanksModal.classList.add('modal__dialog');
+    thanksModal.innerHTML = `
         <div class="modal__content">
         <div class="modal__close" data-close>×</div>
         <div class="modal__title">${message}</div>
         </div>`;
 
-        modal.insertAdjacentElement('beforeend', thanksModal)
-        setTimeout(() => {
-            thanksModal.remove()
-            modalDialog.classList.add('show')
-            modalDialog.classList.remove('hide')
-            hideModal()
-        }, 40000)
-    }
+    modal.insertAdjacentElement('beforeend', thanksModal)
+    setTimeout(() => {
+        thanksModal.remove()
+        modalDialog.classList.add('show')
+        modalDialog.classList.remove('hide')
+        hideModal()
+    }, 40000)
+}
 
-    fetch('http://localhost:3000/menu')
-    .then(data => data.json())
-    .then(res => console.log(res))
+fetch('http://localhost:3000/menu')
+.then(data => data.json())
+.then(res => console.log(res))
 });
