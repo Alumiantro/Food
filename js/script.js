@@ -168,7 +168,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const getResources = async (url) => {
         const result = await fetch(url);
 
-        if(!result.ok) {
+        if (!result.ok) {
             throw new Error(`Could not fetch ${url}, status: ${result.status}`);
         }
 
@@ -182,6 +182,29 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     })
 
+    // Если нам не нужна шаблонизация, если, например, нам нужен только один элемент, можем использовать функцию, а не класс
+    // getResources('http://localhost:3000/menu')
+    //     .then(data => createCard(data))
+    // function createCard(data) {
+    //     data.forEach(({img, altimg, title, descr, price}) => {
+    //         const element = document.createElement('div');
+
+    //         element.classList.add('menu__item');
+
+    //         element.innerHTML = `
+    //         <img src=${img} alt=${altimg}>
+    //                 <h3 class="menu__item-subtitle">${title}</h3>
+    //                 <div class="menu__item-descr">${descr}</div>
+    //                 <div class="menu__item-divider"></div>
+    //                 <div class="menu__item-price">
+    //                     <div class="menu__item-cost">Цена:</div>
+    //                     <div class="menu__item-total"><span>${price}</span> грн/день</div>
+    //                 </div>
+    //         `;
+
+    //         document.querySelector('.menu .container').append(element)
+    //     })
+    // }
     //Post Data
 
     const messages = {
@@ -223,30 +246,31 @@ window.addEventListener('DOMContentLoaded', () => {
             const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
             postData('http://localhost:3000/requests', json)
-            .then(data => {
-                console.log(data);
-                showThanksModal(messages.success);
-                answer.remove();
-            }).catch(() => {
-                showThanksModal(messages.error);
-            }).finally(() => {
-                form.reset();
-            })
+                .then(data => {
+                    console.log(data);
+                    showThanksModal(messages.success);
+                    answer.remove();
+                }).catch(() => {
+                    showThanksModal(messages.error);
+                }).finally(() => {
+                    form.reset();
+                })
         });
     }
 
     fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        body: JSON.stringify({
-            name: 'Adelya',
-            age: 12
-        }),
-        headers: {
-            'content-type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(json => console.log(json))
+            method: 'POST',
+            body: JSON.stringify({
+                name: 'Adelya',
+                age: 12
+            }),
+            headers: {
+                'content-type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(json => console.log(json))
+
     function showThanksModal(message) {
         const modalDialog = document.querySelector('.modal__dialog');
         modalDialog.classList.add('hide')
