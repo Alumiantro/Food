@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
     tabsParent.addEventListener('click', (event) => {
         const target = event.target;
         if (target && target.classList.contains('tabheader__item')) {
-            hideContent(contentTabs);
+            hideContent();
             tabs.forEach((item, index) => {
                 if (target == item) {
                     showContent(index);
@@ -165,33 +165,46 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    new MenuCard(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        "Меню 'Фитнес'",
-        "Меню 'Фитнес' - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!",
-        9,
-        '.menu .container'
-    ).render();
+    const getResources = async (url) => {
+        const result = await fetch(url);
 
-    new MenuCard(
-        "img/tabs/elite.jpg",
-        "elite",
-        "Меню 'Премиум'",
-        "В меню 'Премиум' мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!",
-        10,
-        '.menu .container'
-    ).render();
+        if (!result.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${result.status}`);
+        }
 
-    new MenuCard(
-        "img/tabs/post.jpg",
-        "post",
-        "Меню 'Постное'",
-        "Меню 'Постное' - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.",
-        14,
-        '.menu .container'
-    ).render();
+        return await result.json();
+    }
 
+    getResources('http://localhost:3000/menu')
+    .then(data => {
+        data.forEach(({img, altimg, title, descr, price}) => {
+            new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+        });
+    })
+
+    // Если нам не нужна шаблонизация, если, например, нам нужен только один элемент, можем использовать функцию, а не класс
+    // getResources('http://localhost:3000/menu')
+    //     .then(data => createCard(data))
+    // function createCard(data) {
+    //     data.forEach(({img, altimg, title, descr, price}) => {
+    //         const element = document.createElement('div');
+
+    //         element.classList.add('menu__item');
+
+    //         element.innerHTML = `
+    //         <img src=${img} alt=${altimg}>
+    //                 <h3 class="menu__item-subtitle">${title}</h3>
+    //                 <div class="menu__item-descr">${descr}</div>
+    //                 <div class="menu__item-divider"></div>
+    //                 <div class="menu__item-price">
+    //                     <div class="menu__item-cost">Цена:</div>
+    //                     <div class="menu__item-total"><span>${price}</span> грн/день</div>
+    //                 </div>
+    //         `;
+
+    //         document.querySelector('.menu .container').append(element)
+    //     })
+    // }
     //Post Data
 
     const messages = {
@@ -203,105 +216,85 @@ window.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('form');
 
     forms.forEach(form => {
-        bindPostData(form);
-    });
+        bindpostData(form);
+    })
 
-    const postData = () => {
-        const res = fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify(object)
-            }
-        });
-};
+    const postData = async (url, data) => {
+        const result = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: data
+        })
+        return await result.json();
+    }
 
-function bindPostData(form) {
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
+    function bindpostData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
 
-        const answer = document.createElement('img');
-        answer.src = messages.download;
-        answer.style.cssText = `
+            const answer = document.createElement('img');
+            answer.src = messages.download;
+            answer.style.cssText = `
                 display: block;
                 margin: 0 auto;
             `;
-        form.insertAdjacentElement('afterend', answer);
+            form.insertAdjacentElement('afterend', answer);
 
-        const formData = new FormData(form);
-        const object = {};
-        formData.forEach(function (value, key) {
-            object[key] = value;
-        })
+            const formData = new FormData(form);
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-        fetch('server1.php', {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify(object)
-            }).then(data => data.text())
-            .then(data => {
-                console.log(data);
-                showThanksModal(messages.success);
-                answer.remove();
-            }).catch(() => {
-                showThanksModal(messages.error);
-            }).finally(() => {
-                form.reset();
-            })
-
-        // request.addEventListener('load', () => {
-        //     if (request.status === 200) {
-        //         console.log(request.response);
-        //         showThanksModal(messages.success);
-        //         answer.remove();
-        //         form.reset();
-        //     } else {
-        //         showThanksModal(messages.error);
-        //     }
-        // });
-    });
-}
-
-fetch('https://jsonplaceholder.typicode.com/posts', {
-    method: 'POST',
-    body: JSON.stringify({
-        name: 'Adelya',
-        age: 12
-    }),
-    headers: {
-        'content-type': 'application/json'
+            postData('http://localhost:3000/requests', json)
+                .then(data => {
+                    console.log(data);
+                    showThanksModal(messages.success);
+                    answer.remove();
+                }).catch(() => {
+                    showThanksModal(messages.error);
+                }).finally(() => {
+                    form.reset();
+                })
+        });
     }
-})
-.then(response => response.json())
-.then(json => console.log(json))
 
-function showThanksModal(message) {
-    const modalDialog = document.querySelector('.modal__dialog');
-    modalDialog.classList.add('hide')
+    fetch('https://jsonplaceholder.typicode.com/posts', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: 'Adelya',
+                age: 12
+            }),
+            headers: {
+                'content-type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(json => console.log(json))
 
-    openModal()
+    function showThanksModal(message) {
+        const modalDialog = document.querySelector('.modal__dialog');
+        modalDialog.classList.add('hide')
 
-    const thanksModal = document.createElement('div');
-    thanksModal.classList.add('modal__dialog');
-    thanksModal.innerHTML = `
+        openModal()
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
         <div class="modal__content">
         <div class="modal__close" data-close>×</div>
         <div class="modal__title">${message}</div>
         </div>`;
 
-    modal.insertAdjacentElement('beforeend', thanksModal)
-    setTimeout(() => {
-        thanksModal.remove()
-        modalDialog.classList.add('show')
-        modalDialog.classList.remove('hide')
-        hideModal()
-    }, 40000)
-}
+        modal.insertAdjacentElement('beforeend', thanksModal)
+        setTimeout(() => {
+            thanksModal.remove()
+            modalDialog.classList.add('show')
+            modalDialog.classList.remove('hide')
+            hideModal()
+        }, 1000)
+    }
 
-fetch('http://localhost:3000/menu')
-.then(data => data.json())
-.then(res => console.log(res))
+    // fetch('db.json')
+    //     .then(data => data.json())
+    //     .then(res => console.log(res))
 });
